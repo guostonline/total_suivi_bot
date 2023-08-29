@@ -19,16 +19,16 @@ class Excel:
         day_work = day_work.split(" ", 2)
         a: str = day_work[0].replace("/", "")
         b: str = day_work[1]
+
         print(f"day work is : {int(a), int(b)}")
 
         return int(a), int(b.strip())
 
-    def __fix_quantitatif(self):
-        wb = load_workbook(self.path)
-        sheet_ranges = wb["AGADIR"]
+    async def __fix_quantitatif(self):
 
+        wb = load_workbook("excel/suivi.xlsx")
         try:
-
+            sheet_ranges = wb["AGADIR"]
             sheet_ranges.unmerge_cells("A8:A9")
             sheet_ranges.unmerge_cells("B8:B9")
             sheet_ranges.unmerge_cells("D8:D9")
@@ -60,22 +60,25 @@ class Excel:
 
             wb.save("excel/finale.xlsx")
             print("quantitatif saved")
-
         except Exception as e:
             print(e)
 
-    def __fix_qualitatif(self):
-        wb = load_workbook("excel/finale.xlsx")
-        sheet_ranges = wb["QUALI NV"]
+    async def __fix_qualitatif(self):
+
         try:
+            wb = load_workbook("excel/suivi.xlsx")
+            sheet_ranges = wb["QUALI NV"]
             sheet_ranges.unmerge_cells("E1:K2")
             sheet_ranges.delete_rows(1, 7)
             sheet_ranges.delete_rows(2, 4)
+            sheet_ranges.delete_rows(10, 1)
             sheet_ranges.delete_cols(1, 3)
             sheet_ranges.delete_cols(2, 3)
             sheet_ranges.delete_cols(3, 3)
             sheet_ranges.delete_cols(4, 11)
             sheet_ranges.delete_cols(7, 2)
+            sheet_ranges.delete_rows(sheet_ranges.max_row - 1)
+
             sheet_ranges['A1'] = "Vendeur"
             sheet_ranges['C1'] = "ACM"
             sheet_ranges['F1'] = "LINE"
@@ -88,6 +91,6 @@ class Excel:
         except Exception as e:
             print(e)
 
-    def fix_sheets(self):
-        self.__fix_quantitatif()
-        self.__fix_qualitatif()
+    async def fix_sheets(self):
+        await self.__fix_quantitatif()
+        await self.__fix_qualitatif()

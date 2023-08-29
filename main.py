@@ -1,13 +1,13 @@
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 import logging
-import os
+import json
 from suivi import Suivi
 from excel_fonctions import Excel
-import dataframe_image as dfi
+import os
 from vendeur import vendeur_number_phone
 
-TOKEN = "6419312810:AAG4Zt2jP9SjkB80I5hSEatlulmOSE4zB7E"
+TOKEN = "6419312810:AAH-hpVg6hd28dkMqZY1xw6hlXrh-iBB9G8"
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
@@ -46,6 +46,44 @@ async def welcome(message: types.Message):
     await message.answer("Hi are you Admin or Vendeur", reply_markup=keyboard_admin_vendeur)
 
 
+def write_file(value: str):
+    # Open a file in write mode
+    try:
+        data = {
+            "days": {
+                "rr": value
+            }
+        }
+
+        # Specify the file name
+        file_name = "days.json"
+
+        # Open the file in write mode and use json.dump() to write the data as JSON
+        with open(file_name, "w") as json_file:
+            json.dump(data, json_file, indent=4)
+            print("Data written successfully.")
+    except Exception as e:
+        print("An error occurred:", e)
+
+
+async def send_qualitatif(chat_id, vendeur_name: str, month: int = 24, days_work: int = 1):
+    suivi = Suivi(vendeur_name=vendeur_name, total_to_work=month, days_work=days_work)
+    suivi.send_qualitatif()
+    await bot.send_photo(chat_id=chat_id, photo=open(f"excel/{code_vendeur} {name_vendeur}.jpeg", 'rb'),
+                         caption="jaune : TTC",
+                         reply_markup=keyboard_vendeur)
+    os.remove(f"excel/{code_vendeur} {name_vendeur}.jpeg")
+
+
+async def send_quantitatif(chat_id, vendeur_name: str, month: int = 24, days_work: int = 1):
+    suivi = Suivi(vendeur_name=vendeur_name, total_to_work=month, days_work=days_work)
+    suivi.send_quantitatif()
+    await bot.send_photo(chat_id=chat_id, photo=open(f"excel/{code_vendeur} {name_vendeur}.jpeg", 'rb'),
+                         caption="jaune : TTC",
+                         reply_markup=keyboard_vendeur)
+    os.remove(f"excel/{code_vendeur} {name_vendeur}.jpeg")
+
+
 @dp.message_handler()
 async def echo(message: types.Message):
     if message.text == "Vendeur":
@@ -67,27 +105,10 @@ async def echo(message: types.Message):
     if message.text == "Admin":
         await message.answer(f'Saisie votre mot de pass')
     if message.text == "iamsorry":
-        await message.answer(f'Bonjour Chakib', reply_markup=keyboard_admin)
-    if message.text == "Send excel":
-        await message.answer(f'Send a excel file', )
-
-
-async def send_qualitatif(chat_id, vendeur_name: str, month: int = 24, days_work: int = 1):
-    suivi = Suivi(vendeur_name=vendeur_name, total_to_work=month, days_work=days_work)
-    suivi.send_qualitatif()
-    await bot.send_photo(chat_id=chat_id, photo=open(f"excel/{code_vendeur} {name_vendeur}.jpeg", 'rb'),
-                         caption="jaune : TTC",
-                         reply_markup=keyboard_vendeur)
-    os.remove(f"excel/{code_vendeur} {name_vendeur}.jpeg")
-
-
-async def send_quantitatif(chat_id, vendeur_name: str, month: int = 24, days_work: int = 1):
-    suivi = Suivi(vendeur_name=vendeur_name, total_to_work=month, days_work=days_work)
-    suivi.send_quantitatif()
-    await bot.send_photo(chat_id=chat_id, photo=open(f"excel/{code_vendeur} {name_vendeur}.jpeg", 'rb'),
-                         caption="jaune : TTC",
-                         reply_markup=keyboard_vendeur)
-    os.remove(f"excel/{code_vendeur} {name_vendeur}.jpeg")
+        await message.answer(f'Bonjour Chakib. write real days rest')
+    if message.text[0].isdigit():
+        write_file(int(message.text))
+        await message.answer("Send Excel now!")
 
 
 @dp.message_handler(content_types=types.ContentTypes.DOCUMENT)
@@ -114,10 +135,17 @@ async def handle_document(message: types.Message):
         # Make a mod file
         a = Excel("excel/suivi.xlsx")
 
-        a.fix_sheets()
+        await a.fix_sheets()
 
         w_day, t_day = a.get_day_work()
-        d_rest = t_day - w_day
+
+        with open("days.json", "r") as jsonFile:
+            data = json.load(jsonFile)
+
+        data["from_file"] = {"t": t_day, "d": w_day}
+
+        with open("days.json", "w") as jsonFile:
+            json.dump(data, jsonFile)
 
 
 print("Program start")

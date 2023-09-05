@@ -34,7 +34,6 @@ def main():
         resize_keyboard=True, one_time_keyboard=True
     ).row(btn_Quantitatif, btn_Qualitatif, btn_obj, btn_focus)
 
-
     def search_index(my_list: list, name: str) -> int:
         for i in my_list:
             if i.startswith(name):
@@ -73,8 +72,8 @@ def main():
         os.remove(f"excel/{vendeur_name}.jpeg")
 
     async def send_quantitatif(
-        chat_id,
-        vendeur_name: str,
+            chat_id,
+            vendeur_name: str,
     ):
         print(vendeur_name)
         suivi = Suivi(vendeur_name)
@@ -97,7 +96,7 @@ def main():
                 code_name_vendeurs, message.text
             )
             await message.answer(
-                f"Bonjour {code_name_vendeur.split(' ',1)[1]} \n tu veux quoi?",
+                f"Bonjour {code_name_vendeur.split(' ', 1)[1]} \n tu veux quoi?",
                 reply_markup=keyboard_vendeur,
             )
         if message.text == "Quantitatif":

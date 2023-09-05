@@ -33,12 +33,7 @@ def main():
     keyboard_vendeur = ReplyKeyboardMarkup(
         resize_keyboard=True, one_time_keyboard=True
     ).row(btn_Quantitatif, btn_Qualitatif, btn_obj, btn_focus)
-    keyboard_admin = ReplyKeyboardMarkup(
-        resize_keyboard=True, one_time_keyboard=True
-    ).row(btn_send_excel, btn_Quantitatif, btn_Quantitatif)
 
-    code_vendeur = ""
-    name_vendeur = ""
 
     def search_index(my_list: list, name: str) -> int:
         for i in my_list:

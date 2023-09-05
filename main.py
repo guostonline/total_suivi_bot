@@ -75,7 +75,7 @@ def main():
             caption="jaune : TTC",
             reply_markup=keyboard_vendeur,
         )
-        os.remove(f"excel/{code_vendeur} {name_vendeur}.jpeg")
+        os.remove(f"excel/{vendeur_name}.jpeg")
 
     async def send_quantitatif(
         chat_id,
@@ -90,7 +90,7 @@ def main():
             caption="jaune : TTC",
             reply_markup=keyboard_vendeur,
         )
-        os.remove(f"excel/{code_vendeur} {name_vendeur}.jpeg")
+        os.remove(f"excel/{vendeur_name}.jpeg")
 
     @dp.message_handler()
     async def echo(message: types.Message):
